@@ -1,0 +1,70 @@
+User gives link to shorten - > 
+
+1) Check in database if url exists
+	a) if exists give the id of the url
+	b) if url does not exist store the url and generate new id
+2) convert this int base10 id to base62 , allowing compression of digits of the id 
+3) give the user this url with id in the form https:/localhost:8080/g/${id}
+4) when user goes on this url, search the database for the id after https:/localhost:8080/g/ and redirect to the stored url in database
+
+
+Allow user to create new url by adding it after https:/localhost:8080/s/${url to be shortened)
+
+------
+
+Technologies used for application: 
+	language: Go
+	Database: Mysql
+
+important packages: 
+	import packages "github.com/go-sql-driver/mysql" "database/sql" for mysql connection with mysql. 
+	import package "net/http" for url manipulation and making connections
+
+Required Constants: 
+	alphabets for conversion of base10 to base62 a-z, A-Z and 0-9 total of 62 chars.
+	Mysql id or (-u "value") for the user
+	Mysql pass or (-p "value") of the user for the id to make a connection to mysql server
+
+1) Make connection with a port to listen to it for any http requests in the main function
+	
+	http.ListenAndServe(":8080", nil)
+
+2) On the specified URL if any requests are made capture them and run functions on them. 
+	
+	http.HandleFunc("/", indexpage)
+	when https:/localhost:8080/ request is made take them to the function indexpage. (3)
+
+	http.HandleFunc("/s/", get_url_and_convert)
+	when https:/localhost:8080/s/ request is made take them to the function get_url_and_convert. (4)
+	
+	http.HandleFunc("/g/", get_url_and_find)
+	when https:/localhost:8080/g/ request is made take them to the function get_url_and_find. (5)
+
+3) Function indexpage : 
+
+	Takes the user to the page where he is greeted with how to shorten a url
+
+4) Function get_url_and_convert : 
+
+	Takes the input from the user that is entered after https:/localhost:8080/s/ and treats it like the main input for our database. 
+	It checks if the url is present in the table "url_s" of database "url" if it is present it returns the id of the particular url. 
+	If it is not present it inserts it in the database as a new item and returns the id of the new insertion. This id is taken and encoded (6)
+	to make it shorter and is returned in the form of https:/localhost:8080/g/"encoded value"
+
+5) Function get_url_and_find :
+
+	When the url https:/localhost:8080/g/"encoded value" is entered the value component is taken from the url. This is usually the Encoded value from 
+	get_url_and_convert , we then decode this value using Decode function (7) this decoded value is the original id of the actual url in the 
+	database. This decoded id is then searched in the database and the corresponding actual url is redirected on the browser of the user. 
+	307 represents the http status code. 
+
+6) Function Encode :
+	This function takes the id value as integer and gives us the encoded base62 value.
+
+7) Function Decode :
+	This function takes the encoded base62 value and gives the decoded Integer value.
+
+
+
+
+	

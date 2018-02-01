@@ -1,11 +1,3 @@
 package: .
 import:
-- package: database/sql
-- package: fmt
 - package: github.com/go-sql-driver/mysql
-- package: log
-- package: net/http
-- package: strconv
-- package: strings
-testImport:
-- package: testing
